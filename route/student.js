@@ -45,8 +45,8 @@ route.get("/getAllStudent",async(req, res)=>{
                     }
                 });
                 res.status(200).json(formatRows);
-                console.log('Query results:', results);
-                console.log('Field metadata:', fields);
+                // console.log('Query results:', results);
+                // console.log('Field metadata:', fields);
             });
     } catch (e) {
         console.error(e);
@@ -71,7 +71,7 @@ route.post("/saveStudent",async(req, res)=>{
                 if(error){
                     return;
                 }
-                res.status(200).send("insert complete");
+                res.status(200).send({message:"insert complete"});
             }
             );
         
@@ -93,7 +93,7 @@ route.post("/deleteStudent",async(req, res)=>{
                     res.status(500).json({ error: 'Internal Server Error' });
                     return;
                 }
-                res.status(200).send("delete complete" + fields);
+                res.status(200).send({message:"delete complete"});
             });
     } catch (error) {
         console.error(e);
@@ -101,13 +101,63 @@ route.post("/deleteStudent",async(req, res)=>{
     }
 })
 
-route.post("/searchStudent",(req, res)=>{
+route.post("/searchStudent",async(req, res)=>{
+    const { std_id, name, nickname, prefix_name, birthdate } = req.body;
     try {
+        pool.query(
+            "SELECT student.std_id, student.nickname,prefix_name.prefix,student.name,DATE_FORMAT(student.birthdate, '%Y-%m-%d') AS birthdate,TIMESTAMPDIFF(YEAR, student.birthdate, CURDATE()) AS age"
+            +" FROM student,prefix_name" 
+            +" WHERE student.prefix = prefix_name.pid"
+            +" AND (student.std_id LIKE ? OR student.`name` LIKE ?" 
+            +" OR student.nickname LIKE ? OR prefix_name.prefix LIKE ?" 
+            +" OR birthdate LIKE ?)",
+            ['%' + std_id + '%', '%' + name + '%', '%' + nickname + '%', '%' + prefix_name + '%', '%' + birthdate + '%'],
+            (error,results,fields)=>{
+                if(error){
+                    console.error('Error executing query:', error);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                    return;
+                }
+                const formatRows = results.map(row =>{
+                    return{
+                        "student_id": Number(row.std_id),
+                        "prefix_name":row.prefix,
+                        "name": row.name,
+                        "nickname": row.nickname,
+                        "birthdate": row.birthdate,
+                        "age": Number(row.age)
         
+                    }
+                });
+                res.status(200).json(formatRows);
+
+            })
     } catch (error) {
         console.error(e);
         res.status(500).json({ e: 'Internal Server Error' });
     }
 })
+
+route.post("/updateStudent", async (req, res) => {
+    const { std_id, name, nickname, prefix_name, birthdate } = req.body;
+    try {
+        pool.query(
+            "UPDATE student " +
+            "SET name = ?, nickname = ?, prefix = ?, birthdate = ? " +
+            "WHERE std_id = ?",
+            [name, nickname, prefix_name, birthdate, std_id],
+            (error, results, fields) => {
+                if (error) {
+                    console.error('Error executing query:', error);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                    return;
+                }
+                res.status(200).json({ message: 'Student updated successfully' });
+            });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 module.exports = route;
