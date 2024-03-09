@@ -5,10 +5,10 @@ const { error } = require('console');
 const route = express.Router();
 
 const pool = mysql.createConnection({
-    host:"127.0.0.1",
-    user:"root",
-    password:"1234",
-    database:"studentinfo"
+    host : "202.28.34.197",
+    user : "web65_64011212232",
+    password : "64011212232@csmsu",
+    database: "web65_64011212232"
 })
 
 
@@ -24,9 +24,9 @@ pool.connect(function(err, connection) {
 route.get("/getAllStudent",async(req, res)=>{
     try {
         pool.query(
-            "SELECT student.std_id, student.nickname,prefixname.prefix_name,student.name,TIMESTAMPDIFF(YEAR, student.birthday, CURDATE()) AS age "
-            +"FROM student,prefixname "
-            +"WHERE student.sprefix = prefixname.pid;"
+            "SELECT student.std_id, student.nickname,prefix_name.prefix,student.name,TIMESTAMPDIFF(YEAR, student.birthdate, CURDATE()) AS age "
+            +"FROM student,prefix_name "
+            +"WHERE student.prefix = prefix_name.pid;"
             ,(error, results, fields)=>{
                 if (error) {
                     console.error('Error executing query:', error);
@@ -64,7 +64,7 @@ route.post("/saveStudent",async(req, res)=>{
     try {
         // conn = await pool.connect();
         pool.query(
-            "INSERT INTO student (sid,std_id, nickname, sprefix, name, birthday) VALUES (NULL,?,?,?,?,?)",
+            "INSERT INTO student (sid,std_id, nickname, prefix, name, birthdate) VALUES (NULL,?,?,?,?,?)",
             [std_id,nickname,sprefix,name,birthday],
             (error,results,fields)=>{
                 if(error){
@@ -78,7 +78,5 @@ route.post("/saveStudent",async(req, res)=>{
         
     }
 })
-
-
 
 module.exports = route;
