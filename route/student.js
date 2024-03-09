@@ -36,7 +36,7 @@ route.get("/getAllStudent",async(req, res)=>{
                 const formatRows = results.map(row =>{
                     return{
                         "student_id": Number(row.std_id),
-                        "prefix_name":row.prefix_name,
+                        "prefix_name":row.prefix,
                         "name": row.name,
                         "nickname": row.nickname,
                         "birthdate": row.birthdate,
@@ -95,6 +95,15 @@ route.post("/deleteStudent",async(req, res)=>{
                 }
                 res.status(200).send("delete complete" + fields);
             });
+    } catch (error) {
+        console.error(e);
+        res.status(500).json({ e: 'Internal Server Error' });
+    }
+})
+
+route.post("/searchStudent",(req, res)=>{
+    try {
+        
     } catch (error) {
         console.error(e);
         res.status(500).json({ e: 'Internal Server Error' });
