@@ -24,7 +24,7 @@ pool.connect(function(err, connection) {
 route.get("/getAllStudent",async(req, res)=>{
     try {
         pool.query(
-            "SELECT student.std_id, student.nickname,prefix_name.prefix,student.name,TIMESTAMPDIFF(YEAR, student.birthdate, CURDATE()) AS age "
+            "SELECT student.std_id, student.nickname,prefix_name.prefix,student.name,DATE_FORMAT(student.birthdate, '%Y-%m-%d') AS birthdate,TIMESTAMPDIFF(YEAR, student.birthdate, CURDATE()) AS age "
             +"FROM student,prefix_name "
             +"WHERE student.prefix = prefix_name.pid;"
             ,(error, results, fields)=>{
@@ -39,6 +39,7 @@ route.get("/getAllStudent",async(req, res)=>{
                         "prefix_name":row.prefix_name,
                         "name": row.name,
                         "nickname": row.nickname,
+                        "birthdate": row.birthdate,
                         "age": Number(row.age)
         
                     }
@@ -75,7 +76,28 @@ route.post("/saveStudent",async(req, res)=>{
             );
         
     } catch (error) {
-        
+        console.error(e);
+        res.status(500).json({ e: 'Internal Server Error' });
+    }
+})
+
+route.post("/deleteStudent",async(req, res)=>{
+    const {std_id} = req.body;
+    try {
+        pool.query(
+            "DELETE FROM student where std_id = ?",
+            [std_id],
+            (error,results,fields)=>{
+                if(error){
+                    console.error('Error executing query:', error);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                    return;
+                }
+                res.status(200).send("delete complete" + fields);
+            });
+    } catch (error) {
+        console.error(e);
+        res.status(500).json({ e: 'Internal Server Error' });
     }
 })
 
