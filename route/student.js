@@ -24,7 +24,7 @@ pool.connect(function(err, connection) {
 route.get("/getAllStudent",async(req, res)=>{
     try {
         pool.query(
-            "SELECT student.std_id, student.nickname,prefix_name.prefix,student.name,DATE_FORMAT(student.birthdate, '%Y-%m-%d') AS birthdate,TIMESTAMPDIFF(YEAR, student.birthdate, CURDATE()) AS age "
+            "SELECT student.sid,student.std_id, student.nickname,prefix_name.prefix,student.name,DATE_FORMAT(student.birthdate, '%Y-%m-%d') AS birthdate,TIMESTAMPDIFF(YEAR, student.birthdate, CURDATE()) AS age "
             +"FROM student,prefix_name "
             +"WHERE student.prefix = prefix_name.pid;"
             ,(error, results, fields)=>{
@@ -35,6 +35,7 @@ route.get("/getAllStudent",async(req, res)=>{
                 }
                 const formatRows = results.map(row =>{
                     return{
+                        "sid":Number(row.sid),
                         "student_id": Number(row.std_id),
                         "prefix_name":row.prefix,
                         "name": row.name,
@@ -105,7 +106,7 @@ route.post("/searchStudent",async(req, res)=>{
     const { std_id, name, nickname, prefix_name, birthdate } = req.body;
     try {
         pool.query(
-            "SELECT student.std_id, student.nickname,prefix_name.prefix,student.name,DATE_FORMAT(student.birthdate, '%Y-%m-%d') AS birthdate,TIMESTAMPDIFF(YEAR, student.birthdate, CURDATE()) AS age"
+            "SELECT student.sid,student.std_id, student.nickname,prefix_name.prefix,student.name,DATE_FORMAT(student.birthdate, '%Y-%m-%d') AS birthdate,TIMESTAMPDIFF(YEAR, student.birthdate, CURDATE()) AS age"
             +" FROM student,prefix_name" 
             +" WHERE student.prefix = prefix_name.pid"
             +" AND (student.std_id LIKE ? OR student.`name` LIKE ?" 
@@ -120,6 +121,7 @@ route.post("/searchStudent",async(req, res)=>{
                 }
                 const formatRows = results.map(row =>{
                     return{
+                        "sid":Number(row.sid),
                         "student_id": Number(row.std_id),
                         "prefix_name":row.prefix,
                         "name": row.name,
