@@ -141,13 +141,13 @@ route.post("/searchStudent",async(req, res)=>{
 })
 
 route.post("/updateStudent", async (req, res) => {
-    const { std_id, name, nickname, prefix_name, birthdate } = req.body;
+    const { std_id, name, nickname, prefix_name, birthdate, sid } = req.body;
     try {
         pool.query(
             "UPDATE student " +
-            "SET name = ?, nickname = ?, prefix = ?, birthdate = ? " +
-            "WHERE std_id = ?",
-            [name, nickname, prefix_name, birthdate, std_id],
+            "SET std_id = ?, name = ?, nickname = ?, prefix = ?, birthdate = ? " +
+            "WHERE sid = ?",
+            [std_id, name, nickname, prefix_name, birthdate, sid],
             (error, results, fields) => {
                 if (error) {
                     console.error('Error executing query:', error);
